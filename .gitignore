@@ -1,0 +1,56 @@
+# ===== .NET =====
+bin/
+obj/
+out/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+project.lock.json
+artifacts/
+*.dll
+*.pdb
+
+# ===== EF Core / DB =====
+*.mdf
+*.ldf
+*.db
+*.db-shm
+*.db-wal
+
+# ===== Secrets / config (never commit real secrets) =====
+appsettings.Development.json
+appsettings.*.local.json
+*.env
+.env
+secrets.json
+
+# ===== Angular / Node =====
+easyrent-client/node_modules/
+easyrent-client/dist/
+easyrent-client/.angular/
+easyrent-client/coverage/
+npm-debug.log*
+yarn-error.log*
+
+# ===== IDE / OS =====
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ===== Internal planning docs (not for the repo) =====
+COMPLETE_IMPLEMENTATION_PLAN.md
+IMPLEMENTATION_PLAN.md
+DEVELOPER_GUIDE.md
+
+# ===== Test / coverage =====
+[Tt]est[Rr]esult*/
+coverage/
+*.coverage
+*.trx
