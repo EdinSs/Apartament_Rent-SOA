@@ -1,8 +1,11 @@
 using System.Text;
 using EasyRent.Application.Interfaces.Services;
 using EasyRent.Application.Services;
+using EasyRent.Domain.Entities;
 using EasyRent.Infrastructure;
+using EasyRent.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -41,6 +44,20 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// ASP.NET Core Identity (token-based, no cookie scheme) — provides UserManager & RoleManager.
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
+    options.Password.RequiredLength         = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase       = false;
+    options.Password.RequireLowercase       = false;
+    options.Password.RequireDigit           = false;
+    options.User.RequireUniqueEmail         = true;
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -75,6 +92,12 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService,  AuthService>();
 
 var app = builder.Build();
+
+// Seed roles (Admin/Landlord/Tenant) + the default Admin account on startup.
+using (var scope = app.Services.CreateScope())
+{
+    await DbSeeder.SeedAsync(scope.ServiceProvider);
+}
 
 if (app.Environment.IsDevelopment())
 {

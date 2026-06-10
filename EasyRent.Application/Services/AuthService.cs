@@ -1,3 +1,4 @@
+using EasyRent.Application.Common.Exceptions;
 using EasyRent.Application.DTOs.Auth;
 using EasyRent.Application.Interfaces.Services;
 using EasyRent.Domain.Entities;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace EasyRent.Application.Services;
 
+/// <summary>Handles user registration and login, returning a JWT on success.</summary>
 public class AuthService : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -18,9 +20,8 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
     {
-        var existingUser = await _userManager.FindByEmailAsync(dto.Email);
-        if (existingUser != null)
-            throw new Exception("Bu email zaten kayıtlı.");
+        if (await _userManager.FindByEmailAsync(dto.Email) is not null)
+            throw new BusinessRuleException("This email is already registered.");
 
         var user = new ApplicationUser
         {
@@ -31,7 +32,7 @@ public class AuthService : IAuthService
 
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
-            throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+            throw new BusinessRuleException(string.Join(", ", result.Errors.Select(e => e.Description)));
 
         await _userManager.AddToRoleAsync(user, dto.Role);
 
@@ -48,12 +49,12 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
     {
-        var user = await _userManager.FindByEmailAsync(dto.Email)
-            ?? throw new Exception("Kullanıcı bulunamadı.");
+        var user = await _userManager.FindByEmailAsync(dto.Email);
 
-        var passwordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
-        if (!passwordValid)
-            throw new Exception("Şifre hatalı.");
+        // Same generic message whether the email or the password is wrong → avoids
+        // leaking which accounts exist (user-enumeration protection).
+        if (user is null || !await _userManager.CheckPasswordAsync(user, dto.Password))
+            throw new BusinessRuleException("Invalid email or password.");
 
         var roles = await _userManager.GetRolesAsync(user);
         var role  = roles.FirstOrDefault() ?? "Tenant";
