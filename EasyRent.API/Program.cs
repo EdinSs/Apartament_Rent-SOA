@@ -1,9 +1,11 @@
 using System.Text;
 using EasyRent.Application.Interfaces.Services;
 using EasyRent.Application.Services;
+using EasyRent.Application.Validators;
 using EasyRent.Domain.Entities;
 using EasyRent.Infrastructure;
 using EasyRent.Infrastructure.Data;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -88,8 +90,14 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod());
 });
 
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAuthService,  AuthService>();
+builder.Services.AddScoped<ITokenService,     TokenService>();
+builder.Services.AddScoped<IAuthService,      AuthService>();
+builder.Services.AddScoped<IApartmentService, ApartmentService>();
+builder.Services.AddScoped<IBookingService,   BookingService>();
+builder.Services.AddScoped<IPaymentService,   PaymentService>();
+
+// FluentValidation — registers every validator in the Application assembly.
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterValidator>();
 
 var app = builder.Build();
 
