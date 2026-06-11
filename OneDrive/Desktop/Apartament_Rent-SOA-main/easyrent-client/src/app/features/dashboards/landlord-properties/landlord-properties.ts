@@ -28,17 +28,21 @@ export class LandlordPropertiesComponent implements OnInit {
   listingForm!: FormGroup;
   showCreateForm = false;
 
-  myProperties = [
-    { id: 1, title: 'Riverside Studio, Skopje Center', price: 380, views: 124 },
-    { id: 3, title: 'Charming Flat in Debar Maalo', price: 450, views: 342 }
+  // Hardcoded backup list so your marketplace is never empty on first load
+  private defaultApartments = [
+    { id: 1, title: 'Riverside Studio, Skopje Center', price: 380, location: 'Skopje Center', views: 124 },
+    { id: 2, title: 'Traditional Tetovo Duplex', price: 550, location: 'Tetovo', views: 89 },
+    { id: 3, title: 'Charming Flat in Debar Maalo', price: 450, location: 'Debar Maalo, Skopje', views: 342 },
+    { id: 4, title: 'Minimalist Retreat, Karposh', price: 410, location: 'Karposh, Skopje', views: 195 }
   ];
-
-  incomingApplications: any[] = [];
 
   constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
-    this.loadApplications();
+    // Initialize the global apartments storage if it's completely missing
+    if (!localStorage.getItem('easyrent_global_apartments')) {
+      localStorage.setItem('easyrent_global_apartments', JSON.stringify(this.defaultApartments));
+    }
 
     this.listingForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(5)]],
@@ -51,10 +55,16 @@ export class LandlordPropertiesComponent implements OnInit {
     });
   }
 
-  loadApplications(): void {
+  // 👇 LIVE GETTER: Reads all apartments from the SAME global list the tenant sees
+  get myProperties(): any[] {
+    const saved = localStorage.getItem('easyrent_global_apartments');
+    return saved ? JSON.parse(saved) : this.defaultApartments;
+  }
+
+  // 👇 LIVE GETTER: Reads applications directly from local storage on every render cycle
+  get incomingApplications(): any[] {
     const savedData = localStorage.getItem('easyrent_lease_applications');
-    // Reads all submitted items across both user databases directly
-    this.incomingApplications = savedData ? JSON.parse(savedData) : [];
+    return savedData ? JSON.parse(savedData) : [];
   }
 
   toggleForm(): void {
@@ -73,19 +83,30 @@ export class LandlordPropertiesComponent implements OnInit {
     });
 
     localStorage.setItem('easyrent_lease_applications', JSON.stringify(currentApplications));
-    this.loadApplications();
   }
 
   onSubmitListing(): void {
     if (this.listingForm.valid) {
-      const newApartment = this.listingForm.value;
-      this.myProperties.push({
+      const formValue = this.listingForm.value;
+      
+      const newApartment = {
         id: Date.now(),
-        title: newApartment.title,
-        price: newApartment.price,
+        title: formValue.title,
+        price: Number(formValue.price),
+        location: formValue.location,
+        rooms: Number(formValue.rooms),
+        sqft: Number(formValue.sqft),
+        description: formValue.description,
+        imageUrl: formValue.imageUrl || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800',
         views: 0
-      });
-      alert(`"${newApartment.title}" has been added to your properties layout!`);
+      };
+
+      const currentList = this.myProperties;
+      currentList.push(newApartment);
+      
+      localStorage.setItem('easyrent_global_apartments', JSON.stringify(currentList));
+      
+      alert(`"${newApartment.title}" has been successfully added to the system!`);
       this.listingForm.reset();
       this.showCreateForm = false;
     }

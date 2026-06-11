@@ -44,13 +44,19 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.valid) {
       const { email, password } = this.loginForm.value;
       
-      // Clear old state but remember this fresh user identity!
-      localStorage.clear();
+      // 👇 FIXED: Only remove user session data instead of wiping the entire database!
+      localStorage.removeItem('active_user_email');
+      localStorage.removeItem('active_user_role');
+      
       localStorage.setItem('active_user_email', email.toLowerCase().trim());
 
       this.authService.login({ email, password }).subscribe({
         next: (response) => {
           const userRole = this.authService.getRole();
+          
+          // 👇 Ensure the role is explicitly tracked alongside email session data
+          localStorage.setItem('active_user_role', userRole || 'Tenant');
+          
           alert(`Logged in as: ${email} (${userRole})`);
           
           if (userRole === 'Landlord') {

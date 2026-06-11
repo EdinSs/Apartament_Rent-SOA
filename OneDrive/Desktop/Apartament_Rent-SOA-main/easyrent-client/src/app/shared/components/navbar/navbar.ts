@@ -1,28 +1,41 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
-
+import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '../../../core/services/auth';
 @Component({
-  selector: 'app-navbar', // or 'app-navigation' depending on your selector name
+  selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatButtonModule],
-  templateUrl: './navbar.html', // make sure this matches your html file name exactly
-  styleUrl: './navbar.scss'     // make sure this matches your scss file name exactly
+  imports: [CommonModule, RouterModule, MatToolbarModule, MatButtonModule, MatIconModule],
+  templateUrl: './navbar.html',
+  styleUrl: './navbar.scss'
 })
 export class NavbarComponent {
-  constructor(private router: Router) {}
 
-  getUserRole(): string {
-    return localStorage.getItem('user_role') || '';
+  constructor(public authService: AuthService, private router: Router) {}
+
+  // 👇 READS THE ACTIVE EMAIL SESSIONS LIVE
+  get userEmail(): string | null {
+    return localStorage.getItem('active_user_email');
   }
 
-  isLoggedIn(): boolean {
-    return localStorage.getItem('token') !== null;
+  get userRole(): string | null {
+    return localStorage.getItem('active_user_role');
   }
 
-  logout(): void {
-    localStorage.clear();
+  // 👇 THE MISSING LOGOUT METHOD
+  onLogout(): void {
+    localStorage.removeItem('active_user_email');
+    localStorage.removeItem('active_user_role');
+    
+    // Fallback clear if your authService holds its own token states
+    if (typeof this.authService.logout === 'function') {
+      this.authService.logout();
+    }
+
+    alert('You have successfully logged out!');
     this.router.navigate(['/login']);
   }
 }

@@ -1,112 +1,113 @@
-<div class="dashboard-wrapper">
-  <div class="dash-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+<div class="landlord-container" style="padding: 30px 24px; max-width: 1100px; margin: 0 auto;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
     <div>
-      <h2 style="font-size: 1.8rem; font-weight: 700; color: #111; margin: 0 0 4px 0;">Landlord Control Center</h2>
-      <p style="color: #666; margin: 0;">Manage your properties and review incoming tenant applications.</p>
+      <h1 style="font-size: 2rem; font-weight: 700; color: #111; margin-bottom: 6px;">Landlord Control Center</h1>
+      <p style="color: #666; margin: 0;">Broadcast real estate openings or manage inbound leasing requests.</p>
     </div>
-    <button mat-raised-button color="primary" (click)="toggleForm()">
-      <mat-icon>{{ showCreateForm ? 'close' : 'add' }}</mat-icon> 
-      {{ showCreateForm ? 'Cancel Creation' : 'List New Property' }}
+    <button mat-flat-button color="primary" (click)="toggleForm()" style="border-radius: 6px; padding: 10px 16px;">
+      <mat-icon style="margin-right: 4px;">{{ showCreateForm ? 'close' : 'add' }}</mat-icon>
+      {{ showCreateForm ? 'Cancel Form' : 'List New Property' }}
     </button>
   </div>
 
-  <mat-card class="form-card animate-fade" *ngIf="showCreateForm" style="margin-bottom: 30px; border: 1px solid #e0e0e0; box-shadow: none !important;">
-    <mat-card-header><mat-card-title>Property Details Form</mat-card-title></mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="listingForm" (ngSubmit)="onSubmitListing()" class="form-grid">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Apartment Listing Title</mat-label>
-          <input matInput formControlName="title">
-        </mat-form-field>
+  <mat-card *ngIf="showCreateForm" style="padding: 24px; margin-bottom: 30px; border-radius: 12px; border: 1px solid #ddd;">
+    <h3 style="margin-top: 0; font-weight: 700; margin-bottom: 20px; font-size: 1.2rem;">Property Configuration Details</h3>
+    <form [formGroup]="listingForm" (ngSubmit)="onSubmitListing()" style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
         <mat-form-field appearance="outline">
-          <mat-label>City / Location</mat-label>
-          <input matInput formControlName="location">
+          <mat-label>Property Title</mat-label>
+          <input matInput formControlName="title" placeholder="e.g. Minimalist Central Flat">
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Monthly Rent (€)</mat-label>
           <input matInput type="number" formControlName="price">
+        </mat-form-field>
+      </div>
+      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px;">
+        <mat-form-field appearance="outline">
+          <mat-label>Location</mat-label>
+          <input matInput formControlName="location" placeholder="e.g. Skopje Center">
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Total Rooms</mat-label>
           <input matInput type="number" formControlName="rooms">
         </mat-form-field>
         <mat-form-field appearance="outline">
-          <mat-label>Size (m²)</mat-label>
+          <mat-label>Square Footage (m²)</mat-label>
           <input matInput type="number" formControlName="sqft">
         </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Image URL Path</mat-label>
-          <input matInput formControlName="imageUrl">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Space Description</mat-label>
-          <textarea matInput formControlName="description" rows="3"></textarea>
-        </mat-form-field>
-        <div class="form-actions full-width">
-          <button mat-flat-button color="primary" type="submit" [disabled]="listingForm.invalid">Publish Listing</button>
-        </div>
-      </form>
-    </mat-card-content>
+      </div>
+      <mat-form-field appearance="outline">
+        <mat-label>Image URL</mat-label>
+        <input matInput formControlName="imageUrl">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Description</mat-label>
+        <textarea matInput rows="3" formControlName="description"></textarea>
+      </mat-form-field>
+      <button mat-flat-button color="accent" type="submit" [disabled]="listingForm.invalid" style="padding: 12px 0; font-size: 1rem; font-weight:600; border-radius: 6px;">
+        Publish Listing
+      </button>
+    </form>
   </mat-card>
 
-  <mat-tab-group animationDuration="0ms" *ngIf="!showCreateForm">
-    <mat-tab label="My Active Listings">
-      <div style="padding: 24px 0;" class="form-grid">
-        <mat-card *ngFor="let p of myProperties" style="border: 1px solid #e0e0e0; box-shadow: none !important; border-radius: 8px;">
-          <mat-card-content style="padding: 16px !important;">
-            <h3 style="margin: 0 0 8px 0; font-size: 1.15rem; font-weight: 700;">{{ p.title }}</h3>
-            <p style="margin: 0 0 12px 0; color: #555;"><strong>Rent:</strong> €{{ p.price }}/month</p>
-            <p style="margin: 0; color: #3f51b5; display: flex; align-items: center; gap: 4px; font-size: 0.9rem;">
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">visibility</mat-icon> {{ p.views }} listing views
-            </p>
-          </mat-card-content>
-        </mat-card>
+  <mat-tab-group animationDuration="150ms" style="background: #fff; border-radius: 10px; border: 1px solid #e0e0e0; min-height: 300px;">
+    
+    <mat-tab label="Active Inventory Listings">
+      <div style="padding: 24px;">
+        <div *ngIf="myProperties.length === 0" style="text-align: center; padding: 40px; color: #777;">
+          You have no active real estate listings published.
+        </div>
+        <div *ngIf="myProperties.length > 0" style="display: flex; flex-direction: column; gap: 12px;">
+          <div *ngFor="let prop of myProperties" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border: 1px solid #f0f0f0; border-radius: 8px; background: #fafafa;">
+            <div>
+              <strong style="font-size: 1.05rem; color: #222;">{{ prop.title }}</strong>
+              <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #666;">Location: {{ prop.location || 'Skopje Center' }}</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 24px;">
+              <span *ngIf="prop.views !== undefined" style="font-size: 0.9rem; color: #777; display: flex; align-items: center; gap: 4px;">
+                <mat-icon style="font-size:18px; width:18px; height:18px;">visibility</mat-icon> {{ prop.views }} views
+              </span>
+              <strong style="color: #3f51b5; font-size: 1.1rem;">€{{ prop.price }}/mo</strong>
+            </div>
+          </div>
+        </div>
       </div>
     </mat-tab>
-    
-    <mat-tab>
-      <ng-template mat-tab-label>
-        Lease Requests ({{ incomingApplications.length }})
-      </ng-template>
-      
-      <div style="padding: 24px 0; display: flex; flex-direction: column; gap: 16px;">
+
+    <mat-tab label="Incoming Lease Applications">
+      <div style="padding: 24px;">
         <div *ngIf="incomingApplications.length === 0" style="text-align: center; padding: 40px; color: #777;">
-          No lease requests received yet.
+          No incoming client application files require verification right now.
         </div>
-
-        <mat-card *ngFor="let app of incomingApplications" style="border: 1px solid #e0e0e0; box-shadow: none !important; border-radius: 8px;">
-          <mat-card-content style="display: flex; justify-content: space-between; align-items: center; padding: 20px !important;">
+        <div *ngIf="incomingApplications.length > 0" style="display: flex; flex-direction: column; gap: 14px;">
+          <div *ngFor="let app of incomingApplications" style="border: 1px solid #eaeaea; border-radius: 8px; padding: 18px; background: #fff; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
             <div>
-              <h3 style="margin: 0 0 6px 0; font-size: 1.2rem; font-weight: 700; color: #222;">{{ app.apartmentTitle }}</h3>
-              <p style="margin: 0 0 4px 0; color: #555;">📍 Location: <strong>{{ app.location || 'Skopje' }}</strong></p>
-              <small style="color: #999;">Submitted: {{ app.requestDate }}</small>
-            </div>
-            
-            <div style="text-align: right;">
-              <div style="font-weight: 800; font-size: 1.3rem; color: #3f51b5; margin-bottom: 10px;">
-                €{{ app.monthlyRent }}/mo
-              </div>
-
-              <div *ngIf="app.status === 'Pending'; else statusBadge">
-                <button mat-flat-button color="primary" style="margin-right: 8px; font-weight: 600;" (click)="updateStatus(app.id, 'Approved')">
-                  Accept
-                </button>
-                <button mat-stroked-button color="warn" style="font-weight: 600;" (click)="updateStatus(app.id, 'Declined')">
-                  Decline
-                </button>
-              </div>
-
-              <ng-template #statusBadge>
-                <span [style.color]="app.status === 'Approved' ? '#2e7d32' : '#c62828'" 
-                      style="font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; border: 2px solid; padding: 4px 12px; border-radius: 4px; display: inline-block;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <h4 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #1a1a1a;">{{ app.apartmentTitle }}</h4>
+                <span [style.background-color]="app.status === 'Approved' ? '#e8f5e9' : app.status === 'Declined' ? '#ffebee' : '#fff3e0'"
+                      [style.color]="app.status === 'Approved' ? '#2e7d32' : app.status === 'Declined' ? '#c62828' : '#ef6c00'"
+                      style="padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;">
                   {{ app.status }}
                 </span>
-              </ng-template>
-
+              </div>
+              <p style="margin: 0; font-size: 0.9rem; color: #555;">Applicant Identity: <strong style="color: #3f51b5;">{{ app.tenantEmail }}</strong></p>
+              <small style="color: #888;">Submission Log: {{ app.requestDate }}</small>
             </div>
-          </mat-card-content>
-        </mat-card>
+            
+            <div *ngIf="app.status === 'Pending'" style="display: flex; gap: 8px;">
+              <button mat-stroked-button style="color: #2e7d32; border-color: #2e7d32; border-radius: 4px;" (click)="updateStatus(app.id, 'Approved')">
+                Accept
+              </button>
+              <button mat-stroked-button color="warn" style="border-radius: 4px;" (click)="updateStatus(app.id, 'Declined')">
+                Decline
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </mat-tab>
+
   </mat-tab-group>
 </div>

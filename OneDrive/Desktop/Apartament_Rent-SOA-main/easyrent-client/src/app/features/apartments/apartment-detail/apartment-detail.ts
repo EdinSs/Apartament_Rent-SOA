@@ -4,9 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { ApartmentService } from '../../../core/services/apartment';
 import { AuthService } from '../../../core/services/auth';
-import { Apartment } from '../../../core/models/apartment';
 
 @Component({
   selector: 'app-apartment-detail',
@@ -16,52 +14,47 @@ import { Apartment } from '../../../core/models/apartment';
   styleUrl: './apartment-detail.scss'
 })
 export class ApartmentDetailComponent implements OnInit {
-  apartment: Apartment | undefined;
+  apartment: any = null;
 
-  // 👇 ALL 4 ORIGINAL APARTMENTS RESTORED PERFECTLY 👇
-  private fallbackApartments: Apartment[] = [
+  private fallbackApartments = [
     {
       id: 1,
       title: 'Riverside Studio, Skopje Center',
-      description: 'A beautiful, sunlit studio apartment right near the Vardar River in the heart of the city center. Fully furnished with high-end appliances, smart home controls, and high-speed fiber internet.',
+      description: 'A beautiful, sunlit studio apartment right near the Vardar River in the heart of the city center.',
       price: 380,
       location: 'Skopje Center',
       rooms: 1,
       sqft: 45,
-      landlordName: 'Elena Kostova',
       imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'
     },
     {
       id: 2,
       title: 'Traditional Tetovo Duplex',
-      description: 'Renovated duplex featuring beautiful dark wood beams, a cozy brick fireplace, and large windows looking out toward the Shar Mountains.',
+      description: 'Renovated duplex featuring beautiful dark wood beams and a cozy brick fireplace.',
       price: 550,
       location: 'Tetovo',
       rooms: 3,
       sqft: 110,
-      landlordName: 'Bekim Halimi',
       imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800'
     },
     {
       id: 3,
       title: 'Charming Flat in Debar Maalo',
-      description: 'Vibrant and contemporary flat located in Skopje’s most famous bohemian neighborhood. Steps away from the best cafes, traditional restaurants, and the Central City Park.',
+      description: 'Vibrant and contemporary flat located in Skopje’s most famous bohemian neighborhood.',
       price: 450,
       location: 'Debar Maalo, Skopje',
       rooms: 2,
       sqft: 70,
-      landlordName: 'Marija Angelova',
       imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800'
     },
     {
       id: 4,
       title: 'Minimalist Retreat, Karposh',
-      description: 'Sleek, minimalist design meets modern comfort in this highly desirable Karposh residential zone. Features central climate control and automated roller shades.',
+      description: 'Sleek, minimalist design meets modern comfort in this highly desirable Karposh residential zone.',
       price: 410,
       location: 'Karposh, Skopje',
       rooms: 2,
       sqft: 65,
-      landlordName: 'Stefan Ristovski',
       imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800'
     }
   ];
@@ -69,22 +62,26 @@ export class ApartmentDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private apartmentService: ApartmentService,
     public authService: AuthService
   ) {}
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
+    
+    const savedGlobal = localStorage.getItem('easyrent_global_apartments');
+    const allApartments = savedGlobal ? JSON.parse(savedGlobal) : this.fallbackApartments;
+
     if (idParam) {
-      const targetId = +idParam;
-      this.useFallback(targetId);
+      const targetId = Number(idParam);
+      this.apartment = allApartments.find((apt: any) => apt.id === targetId);
+    }
+
+    if (!this.apartment) {
+      this.apartment = allApartments[0];
     }
   }
 
-  private useFallback(id: number): void {
-    this.apartment = this.fallbackApartments.find(apt => apt.id === id);
-  }
-
+  // 👇 FIXED: Added back to clear the HTML view check error
   hasAlreadyApplied(): boolean {
     if (!this.apartment) return false;
     const savedData = localStorage.getItem('easyrent_lease_applications');
@@ -96,9 +93,13 @@ export class ApartmentDetailComponent implements OnInit {
   }
 
   onBookRequest(): void {
-    if (!this.apartment) return;
+    if (!this.apartment) {
+      alert('Error: No apartment details found to book.');
+      return;
+    }
 
     if (this.hasAlreadyApplied()) {
+      alert('You have already submitted an application for this apartment!');
       return;
     }
 
@@ -108,7 +109,7 @@ export class ApartmentDetailComponent implements OnInit {
       id: Date.now(),
       tenantEmail: currentUserEmail,
       apartmentTitle: this.apartment.title,
-      location: this.apartment.location,
+      location: this.apartment.location || 'Skopje',
       monthlyRent: this.apartment.price,
       status: 'Pending',
       requestDate: new Date().toISOString().split('T')[0]
@@ -120,7 +121,7 @@ export class ApartmentDetailComponent implements OnInit {
     existingBookings.push(newApplication);
     localStorage.setItem('easyrent_lease_applications', JSON.stringify(existingBookings));
 
-    alert(`Application for "${this.apartment.title}" sent to Landlord!`);
+    alert(`Application for "${this.apartment.title}" submitted successfully!`);
     this.router.navigate(['/my-bookings']);
   }
 }

@@ -22,6 +22,7 @@ export class TenantBookingsComponent implements OnInit {
     }
   }
 
+  // 👇 LIVE GETTER: Filters applications dynamically so Besiana only sees her own requests
   get myBookings(): any[] {
     const savedData = localStorage.getItem('easyrent_lease_applications');
     const allApplications: any[] = savedData ? JSON.parse(savedData) : [];

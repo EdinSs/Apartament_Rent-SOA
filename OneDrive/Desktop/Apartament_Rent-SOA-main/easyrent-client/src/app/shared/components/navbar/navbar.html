@@ -1,16 +1,28 @@
-<nav class="navbar" style="display: flex; justify-content: space-between; padding: 15px 30px; background: #fff; border-bottom: 1px solid #eee; align-items: center;">
-  <a class="logo" routerLink="/apartments" style="font-weight: 800; font-size: 1.4rem; color: #3f51b5; text-decoration: none;">easyrent</a>
+<mat-toolbar color="primary" style="display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
   
-  <div class="nav-links" style="display: flex; gap: 20px;" *ngIf="isLoggedIn()">
-    <a routerLink="/apartments" style="text-decoration: none; color: #555; font-weight: 500;">Browse Apartments</a>
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <span routerLink="/apartments" style="font-weight: 800; font-size: 1.3rem; letter-spacing: -0.5px; cursor: pointer;">
+      🏢 EasyRent
+    </span>
     
-    <a *ngIf="getUserRole() === 'Tenant'" routerLink="/my-bookings" style="text-decoration: none; color: #555; font-weight: 500;">My Bookings</a>
-    
-    <a *ngIf="getUserRole() === 'Landlord'" routerLink="/manage-apartments" style="text-decoration: none; color: #555; font-weight: 500;">Landlord Control Center</a>
+    <nav *ngIf="userEmail" style="display: flex; gap: 10px;">
+      <button mat-button routerLink="/apartments" routerLinkActive="active-link">Browse Marketplace</button>
+      
+      <button mat-button *ngIf="userRole === 'Tenant'" routerLink="/my-bookings" routerLinkActive="active-link">My Bookings</button>
+      
+      <button mat-button *ngIf="userRole === 'Landlord'" routerLink="/manage-apartments" routerLinkActive="active-link">Landlord Panel</button>
+    </nav>
   </div>
 
-  <div class="auth-actions">
-    <button mat-button *ngIf="!isLoggedIn()" routerLink="/login">Login</button>
-    <button mat-flat-button color="warn" *ngIf="isLoggedIn()" (click)="logout()">Logout</button>
+  <div style="display: flex; align-items: center; gap: 15px;">
+    <div *ngIf="userEmail" style="text-align: right; line-height: 1.2;">
+      <span style="font-size: 0.85rem; display: block; opacity: 0.95; font-weight: 600;">{{ userEmail }}</span>
+      <small style="font-size: 0.75rem; opacity: 0.7; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase;">{{ userRole }}</small>
+    </div>
+
+    <button mat-icon-button *ngIf="userEmail" (click)="onLogout()" matTooltip="Logout of Account" style="color: #fff;">
+      <mat-icon>logout</mat-icon>
+    </button>
   </div>
-</nav>
+
+</mat-toolbar>
