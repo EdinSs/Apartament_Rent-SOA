@@ -7,7 +7,7 @@ import { Apartment } from '../models/apartment';
   providedIn: 'root'
 })
 export class ApartmentService {
-  private apiUrl = 'https://localhost:7000/api/apartments';
+  private apiUrl = 'https://easyrent-api.onrender.com/api/apartments';
 
   constructor(private http: HttpClient) {}
 
